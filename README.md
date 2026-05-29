@@ -1,5 +1,10 @@
 # ios-simulator-mcp
 
+[![PyPI version](https://badge.fury.io/py/ios-simulator-mcp.svg)](https://badge.fury.io/py/ios-simulator-mcp)
+[![Python Versions](https://img.shields.io/pypi/pyversions/ios-simulator-mcp.svg)](https://pypi.org/project/ios-simulator-mcp/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/adborroto/ios-simulator-mcp/actions/workflows/test.yml/badge.svg)](https://github.com/adborroto/ios-simulator-mcp/actions/workflows/test.yml)
+
 MCP server that gives AI assistants (Claude, Cursor, etc.) direct control over the iOS Simulator.
 
 Built on `xcrun simctl` + AppleScript. 21 tools covering device management, UI interaction, app control, sensor simulation, logs, and video recording — no Appium, no WebDriver, no extra services.
