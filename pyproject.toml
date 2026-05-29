@@ -1,0 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ios-simulator-mcp"
+version = "0.1.0"
+description = "MCP server for controlling the iOS Simulator — screenshots, taps, swipes, logs, and more"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "adborroto", email = "alejandro.dominguez@barkibu.com" }]
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.0",
+    "python-dotenv>=1.0",
+]
+keywords = ["mcp", "ios", "simulator", "xcrun", "simctl", "claude", "cursor", "xcode"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+]
+
+[project.scripts]
+ios-simulator-mcp = "ios_simulator_mcp:main"
+
+[project.urls]
+Homepage = "https://github.com/adborroto/ios-simulator-mcp"
+Repository = "https://github.com/adborroto/ios-simulator-mcp"
+Issues = "https://github.com/adborroto/ios-simulator-mcp/issues"
