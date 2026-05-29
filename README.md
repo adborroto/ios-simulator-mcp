@@ -13,15 +13,40 @@ Built on `xcrun simctl` + AppleScript. 21 tools covering device management, UI i
 
 ---
 
-## Install & run
+## Quick Install (Recommended)
 
-No installation needed. [uv](https://docs.astral.sh/uv/) downloads and runs the package in an isolated environment:
+Automatic installation that configures Claude Desktop, Claude Code, and Cursor:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/adborroto/ios-simulator-mcp/main/install.sh | bash
+```
+
+This will:
+- Install the package via `uv`
+- Auto-configure Claude Desktop
+- Auto-configure Claude Code
+- Auto-configure Cursor
+- No manual JSON editing needed!
+
+### Uninstall
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/adborroto/ios-simulator-mcp/main/uninstall.sh | bash
+```
+
+---
+
+## Manual Installation
+
+### Quick run (no install)
+
+[uv](https://docs.astral.sh/uv/) downloads and runs the package in an isolated environment:
 
 ```bash
 uvx ios-simulator-mcp
 ```
 
-To install permanently:
+### Install permanently
 
 ```bash
 uv tool install ios-simulator-mcp
@@ -29,9 +54,7 @@ uv tool install ios-simulator-mcp
 pip install ios-simulator-mcp
 ```
 
----
-
-## Configure your client
+### Configure your client
 
 ### Claude Code
 
