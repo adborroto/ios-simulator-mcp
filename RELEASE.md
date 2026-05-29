@@ -17,16 +17,12 @@ The release pipeline uses PyPI's trusted publishing feature, which doesn't requi
    - Workflow name: `publish.yml`
    - Environment name: `pypi`
 
-3. **For TestPyPI** (optional, for testing): Visit https://test.pypi.org/manage/account/publishing/
-   - Use the same settings but with Environment name: `testpypi`
-
 ### Configure GitHub Environments
 
 1. Go to your repository on GitHub: https://github.com/adborroto/ios-simulator-mcp/settings/environments
 
-2. Create two environments:
+2. Create the environment:
    - **pypi**: For production releases
-   - **testpypi**: For testing releases (optional)
 
 3. (Optional) Add protection rules to require manual approval before publishing
 
@@ -54,7 +50,6 @@ The release pipeline uses PyPI's trusted publishing feature, which doesn't requi
 4. **Automated publishing**:
    - The GitHub Action will automatically:
      - Build the package
-     - Publish to TestPyPI (for verification)
      - Publish to PyPI
 
 5. **Verify the release**:
