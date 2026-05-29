@@ -15,7 +15,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from typing import Any, Optional
+from typing import Any
 
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
@@ -80,6 +80,7 @@ mcp = FastMCP("ios-simulator")
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
+
 def _run(args: list[str], timeout: int = 30, check: bool = True) -> subprocess.CompletedProcess:
     """Run a subprocess and return the result."""
     logger.info("run: %s", " ".join(args))
@@ -92,7 +93,7 @@ def _run(args: list[str], timeout: int = 30, check: bool = True) -> subprocess.C
     )
 
 
-def _resolve_udid(udid: Optional[str]) -> str:
+def _resolve_udid(udid: str | None) -> str:
     """Return provided udid, env default, or auto-detect the first Booted simulator."""
     if udid:
         return udid
@@ -124,7 +125,12 @@ def _simctl(*args: str, timeout: int = 30) -> dict[str, Any]:
             "success": result.returncode == 0,
         }
     except subprocess.TimeoutExpired:
-        return {"stdout": "", "stderr": f"Command timed out after {timeout}s", "exit_code": -1, "success": False}
+        return {
+            "stdout": "",
+            "stderr": f"Command timed out after {timeout}s",
+            "exit_code": -1,
+            "success": False,
+        }
     except Exception as e:
         logger.error("simctl error: %s", e)
         return {"stdout": "", "stderr": str(e), "exit_code": -1, "success": False}
@@ -165,10 +171,11 @@ def _get_device_logical_width(udid: str) -> int:
 
 # ─── Device Management ────────────────────────────────────────────────────────
 
+
 @mcp.tool()
 def list_simulators(
-    runtime_filter: Optional[str] = None,
-    state_filter: Optional[str] = None,
+    runtime_filter: str | None = None,
+    state_filter: str | None = None,
 ) -> dict[str, Any]:
     """List all available iOS simulators with their name, UDID, and state.
 
@@ -186,13 +193,15 @@ def list_simulators(
         for device in runtime_devices:
             if state_filter and device.get("state") != state_filter:
                 continue
-            devices.append({
-                "udid": device["udid"],
-                "name": device["name"],
-                "state": device.get("state", "Unknown"),
-                "runtime": runtime,
-                "is_available": device.get("isAvailable", False),
-            })
+            devices.append(
+                {
+                    "udid": device["udid"],
+                    "name": device["name"],
+                    "state": device.get("state", "Unknown"),
+                    "runtime": runtime,
+                    "is_available": device.get("isAvailable", False),
+                }
+            )
 
     booted = [d for d in devices if d["state"] == "Booted"]
     return {
@@ -216,12 +225,14 @@ def get_booted_simulator() -> dict[str, Any]:
     for runtime, runtime_devices in data.get("devices", {}).items():
         for device in runtime_devices:
             if device.get("state") == "Booted":
-                booted.append({
-                    "udid": device["udid"],
-                    "name": device["name"],
-                    "state": "Booted",
-                    "runtime": runtime,
-                })
+                booted.append(
+                    {
+                        "udid": device["udid"],
+                        "name": device["name"],
+                        "state": "Booted",
+                        "runtime": runtime,
+                    }
+                )
 
     if not booted:
         return {"booted": [], "primary": None, "message": "No simulator is currently booted."}
@@ -244,7 +255,7 @@ def boot_simulator(udid: str) -> dict[str, Any]:
 
 
 @mcp.tool()
-def shutdown_simulator(udid: Optional[str] = None) -> dict[str, Any]:
+def shutdown_simulator(udid: str | None = None) -> dict[str, Any]:
     """Shutdown a booted iOS simulator.
 
     Args:
@@ -256,8 +267,9 @@ def shutdown_simulator(udid: Optional[str] = None) -> dict[str, Any]:
 
 # ─── UI Control ───────────────────────────────────────────────────────────────
 
+
 @mcp.tool()
-def take_screenshot(udid: Optional[str] = None) -> list:
+def take_screenshot(udid: str | None = None) -> list:
     """Take a screenshot of the simulator screen and return it as an image.
 
     The image is returned inline so the AI can visually analyse the current UI state.
@@ -288,12 +300,14 @@ def _get_simulator_window_bounds() -> tuple[int, int, int, int] | None:
     """Return (win_x, win_y, win_w, win_h) of the frontmost Simulator window via AppleScript."""
     script = (
         'tell application "System Events" to tell process "Simulator" '
-        'to get {position, size} of window 1'
+        "to get {position, size} of window 1"
     )
     try:
         result = subprocess.run(
             ["osascript", "-e", script],
-            capture_output=True, text=True, timeout=5,
+            capture_output=True,
+            text=True,
+            timeout=5,
         )
         if result.returncode != 0:
             return None
@@ -305,8 +319,12 @@ def _get_simulator_window_bounds() -> tuple[int, int, int, int] | None:
 
 
 def _sim_to_screen(
-    sim_x: int, sim_y: int,
-    win_x: int, win_y: int, win_w: int, win_h: int,
+    sim_x: int,
+    sim_y: int,
+    win_x: int,
+    win_y: int,
+    win_w: int,
+    win_h: int,
     device_width: int = 393,
 ) -> tuple[int, int]:
     """Convert simulator logical coordinates to macOS screen coordinates."""
@@ -321,7 +339,7 @@ def _sim_to_screen(
 def tap(
     x: int,
     y: int,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Send a tap gesture at screen coordinates on the simulator.
 
@@ -336,13 +354,19 @@ def tap(
     dev = _resolve_udid(udid)
     device_width = _get_device_logical_width(dev)
 
-    subprocess.run(["osascript", "-e", 'tell application "Simulator" to activate'],
-                   capture_output=True, timeout=5)
+    subprocess.run(
+        ["osascript", "-e", 'tell application "Simulator" to activate'],
+        capture_output=True,
+        timeout=5,
+    )
     time.sleep(0.2)
 
     bounds = _get_simulator_window_bounds()
     if not bounds:
-        return {"success": False, "error": "Could not determine Simulator window bounds via AppleScript"}
+        return {
+            "success": False,
+            "error": "Could not determine Simulator window bounds via AppleScript",
+        }
 
     win_x, win_y, win_w, win_h = bounds
     sx, sy = _sim_to_screen(x, y, win_x, win_y, win_w, win_h, device_width)
@@ -350,8 +374,18 @@ def tap(
     script = f'tell application "System Events" to click at {{{sx}, {sy}}}'
     result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=5)
 
-    logger.info("tap: sim(%d,%d) → screen(%d,%d), win=(%d,%d,%dx%d), device_width=%d",
-                x, y, sx, sy, win_x, win_y, win_w, win_h, device_width)
+    logger.info(
+        "tap: sim(%d,%d) → screen(%d,%d), win=(%d,%d,%dx%d), device_width=%d",
+        x,
+        y,
+        sx,
+        sy,
+        win_x,
+        win_y,
+        win_w,
+        win_h,
+        device_width,
+    )
 
     if result.returncode != 0:
         return {"success": False, "error": result.stderr.strip(), "screen_x": sx, "screen_y": sy}
@@ -362,7 +396,7 @@ def tap(
 @mcp.tool()
 def input_text(
     text: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Type text into the currently focused field on the simulator.
 
@@ -381,7 +415,7 @@ def swipe(
     x2: int,
     y2: int,
     duration: float = 0.5,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Perform a swipe gesture on the simulator screen.
 
@@ -396,13 +430,19 @@ def swipe(
     dev = _resolve_udid(udid)
     device_width = _get_device_logical_width(dev)
 
-    subprocess.run(["osascript", "-e", 'tell application "Simulator" to activate'],
-                   capture_output=True, timeout=5)
+    subprocess.run(
+        ["osascript", "-e", 'tell application "Simulator" to activate'],
+        capture_output=True,
+        timeout=5,
+    )
     time.sleep(0.2)
 
     bounds = _get_simulator_window_bounds()
     if not bounds:
-        return {"success": False, "error": "Could not determine Simulator window bounds via AppleScript"}
+        return {
+            "success": False,
+            "error": "Could not determine Simulator window bounds via AppleScript",
+        }
 
     win_x, win_y, win_w, win_h = bounds
     sx1, sy1 = _sim_to_screen(x1, y1, win_x, win_y, win_w, win_h, device_width)
@@ -430,8 +470,18 @@ end tell
 """
     result = subprocess.run(["osascript", "-e", script], capture_output=True, text=True, timeout=30)
 
-    logger.info("swipe: sim(%d,%d)->(%d,%d) → screen(%d,%d)->(%d,%d), device_width=%d",
-                x1, y1, x2, y2, sx1, sy1, sx2, sy2, device_width)
+    logger.info(
+        "swipe: sim(%d,%d)->(%d,%d) → screen(%d,%d)->(%d,%d), device_width=%d",
+        x1,
+        y1,
+        x2,
+        y2,
+        sx1,
+        sy1,
+        sx2,
+        sy2,
+        device_width,
+    )
 
     if result.returncode != 0:
         return {"success": False, "error": result.stderr.strip()}
@@ -441,10 +491,11 @@ end tell
 
 # ─── App & Deep-Link Control ──────────────────────────────────────────────────
 
+
 @mcp.tool()
 def launch_app(
     bundle_id: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
     wait_for_debugger: bool = False,
 ) -> dict[str, Any]:
     """Launch an app on the simulator by bundle identifier.
@@ -464,7 +515,7 @@ def launch_app(
 @mcp.tool()
 def terminate_app(
     bundle_id: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Terminate a running app on the simulator.
 
@@ -479,7 +530,7 @@ def terminate_app(
 @mcp.tool()
 def open_url(
     url: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Open a URL or deep link in the simulator.
 
@@ -497,7 +548,7 @@ def open_url(
 def grant_permission(
     bundle_id: str,
     permission: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Grant a privacy permission to an app on the simulator.
 
@@ -516,7 +567,7 @@ def grant_permission(
 def revoke_permission(
     bundle_id: str,
     permission: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Revoke a privacy permission from an app on the simulator.
 
@@ -534,7 +585,7 @@ def revoke_permission(
 @mcp.tool()
 def uninstall_app(
     bundle_id: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Uninstall an app from the simulator (clears all app data).
 
@@ -548,11 +599,12 @@ def uninstall_app(
 
 # ─── Sensor Simulation ────────────────────────────────────────────────────────
 
+
 @mcp.tool()
 def set_location(
     latitude: float,
     longitude: float,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Override the GPS location reported to apps on the simulator.
 
@@ -568,7 +620,7 @@ def set_location(
 @mcp.tool()
 def set_appearance(
     mode: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Switch the simulator between light and dark mode.
 
@@ -586,7 +638,7 @@ def set_appearance(
 def set_battery(
     level: int,
     state: str = "charged",
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Override the battery status bar indicator on the simulator.
 
@@ -602,21 +654,26 @@ def set_battery(
         return {"error": f"state must be one of {valid_states}", "success": False}
     dev = _resolve_udid(udid)
     return _simctl(
-        "status_bar", dev, "override",
-        "--batteryLevel", str(level),
-        "--batteryState", state,
+        "status_bar",
+        dev,
+        "override",
+        "--batteryLevel",
+        str(level),
+        "--batteryState",
+        state,
     )
 
 
 # ─── Logs & Recording ─────────────────────────────────────────────────────────
 
+
 @mcp.tool()
 def get_logs(
-    process: Optional[str] = None,
-    keyword: Optional[str] = None,
+    process: str | None = None,
+    keyword: str | None = None,
     lines: int = 100,
     timeout_seconds: int = 3,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Capture recent system logs from the simulator for debugging crashes and errors.
 
@@ -645,7 +702,7 @@ def get_logs(
 
         log_lines = stdout.splitlines()
         if keyword:
-            log_lines = [l for l in log_lines if keyword.lower() in l.lower()]
+            log_lines = [line for line in log_lines if keyword.lower() in line.lower()]
         log_lines = log_lines[-lines:]
 
         return {
@@ -664,7 +721,7 @@ def get_logs(
 @mcp.tool()
 def add_media(
     file_path: str,
-    udid: Optional[str] = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Inject a photo or video file into the simulator's photo library.
 
@@ -683,8 +740,8 @@ def add_media(
 
 @mcp.tool()
 def start_video_recording(
-    output_path: Optional[str] = None,
-    udid: Optional[str] = None,
+    output_path: str | None = None,
+    udid: str | None = None,
 ) -> dict[str, Any]:
     """Start recording the simulator screen to a video file.
 
@@ -733,7 +790,7 @@ def start_video_recording(
 
 
 @mcp.tool()
-def stop_video_recording(udid: Optional[str] = None) -> dict[str, Any]:
+def stop_video_recording(udid: str | None = None) -> dict[str, Any]:
     """Stop an active screen recording and save the video file.
 
     Args:
