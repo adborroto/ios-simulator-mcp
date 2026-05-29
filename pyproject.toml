@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "MCP server for controlling the iOS Simulator — screenshots, taps, swipes, logs, and more"
 readme = "README.md"
 license = { text = "MIT" }
-authors = [{ name = "adborroto", email = "" }]
+authors = [{ name = "adborroto" }]
 requires-python = ">=3.11"
 dependencies = [
     "mcp[cli]>=1.0",

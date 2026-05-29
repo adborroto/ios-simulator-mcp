@@ -8,7 +8,11 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in ios-simulator-mcp, please report it by emailing ****.
+If you discover a security vulnerability in ios-simulator-mcp, please report it through one of these channels:
+
+1. **GitHub Security Advisories** (preferred): https://github.com/adborroto/ios-simulator-mcp/security/advisories/new
+2. **Private vulnerability report**: Use GitHub's private vulnerability reporting feature
+3. **Direct message**: Contact @adborroto on GitHub
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
